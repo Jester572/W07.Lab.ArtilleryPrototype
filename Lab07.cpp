@@ -226,9 +226,9 @@ int main()
        double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
 
        // drag components
-       double theta = atan(dy / dx);
-       double dragx = totalDrag * cos(theta);
-       double dragy = totalDrag * sin(theta);
+       double theta = atan2(dx, dy);
+       double dragx = totalDrag * sin(theta);
+       double dragy = totalDrag * cos(theta);
 
        // x and y acceleration components
        ddx = dragx;
