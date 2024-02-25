@@ -222,12 +222,13 @@ int main()
    {
        // totals
        double totalVel = getTotalSpeed(dx, dy);
-       double totalDrag = computeDrag(totalVel, projectileDiameter);
+       double totalDrag = -1 * computeDrag(totalVel, projectileDiameter);
        double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
 
        // drag components
-       double dragx = -1 * cos(totalDrag);
-       double dragy = -1 * sin(totalDrag);
+       double theta = atan(dy / dx);
+       double dragx = totalDrag * cos(theta);
+       double dragy = totalDrag * sin(theta);
 
        // x and y acceleration components
        ddx = dragx;
@@ -235,7 +236,7 @@ int main()
 
        // x and y components of velocity
        dx = computeVelocity(dx, ddx, dt);
-      dy = computeVelocity(dy, ddy, dt);
+       dy = computeVelocity(dy, ddy, dt);
 
        // positions
        x = computeDistance(posProjectile.getMetersX(), dx, ddx, dt);
