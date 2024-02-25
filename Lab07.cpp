@@ -191,11 +191,14 @@ int main()
        {20000, -9.745},
        {25000, -9.730}
    };
-   double dt = 0.01;
 
    // Break down muzzle velocity into horizontal and vertical, applying angle
    double dx = getHorizontalSpeed(muzzleVel, angleRad);
    double dy = getVerticalSpeed(muzzleVel, angleRad);
+
+   double dt = 0.01;
+   double x;
+   double y;
 
    // Total initial velocity
    double initialVelocity = getTotalSpeed(dx, dy);
@@ -217,21 +220,25 @@ int main()
    double totalTime = 0;
    while(posProjectile.getMetersY() >= 0)
    {
-       double computedGravity = computeGravity(gravity , posProjectile.getMetersY());
-       double drag = computeDrag(getTotalSpeed(dx, dy), projectileDiameter);
+      // all the different accelerations
+      double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
+      double dragx = -1 * computeDrag(dx, projectileDiameter);
+      double dragy = -1 * computeDrag(dy, projectileDiameter);
 
+      // acceleration split between x and y
+      ddx = dragx;
+      ddy = computedGravity + dragy;
 
-       double acceleration = -drag / projectileWeight;
+      // x and y components of velocity
+      dx = computeVelocity(dx, ddx, dt);
+      dy = computeVelocity(dy, ddy, dt);
 
-       cout << drag << endl;
-
-      // Only dy is affected by gravity
-       dy = computeVelocity(dy, computedGravity, dt);
-       dx = computeVelocity(dx, 0.0, dt);
-      
+      // positions
+      x = computeDistance(posProjectile.getMetersX(), dx, ddx, dt);
+      y = computeDistance(posProjectile.getMetersY(), dy, ddy, dt);
       // Update position
-      posProjectile.setMetersX(computeDistance(posProjectile.getMetersX(), dx, acceleration, dt));
-      posProjectile.setMetersY(computeDistance(posProjectile.getMetersY(), dy, computedGravity, dt));
+      posProjectile.setMetersX(x);
+      posProjectile.setMetersY(y);
       totalTime += dt;
    }
    cout << "Distance: " << posProjectile.getMetersX() << "m  Altitude: " << posProjectile.getMetersY() << "m Hang Time: " << totalTime << "s" << endl;
