@@ -220,26 +220,31 @@ int main()
    double totalTime = 0;
    while(posProjectile.getMetersY() >= 0)
    {
-      // all the different accelerations
-      double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
-      double dragx = -1 * computeDrag(dx, projectileDiameter);
-      double dragy = -1 * computeDrag(dy, projectileDiameter);
+       // totals
+       double totalVel = getTotalSpeed(dx, dy);
+       double totalDrag = computeDrag(totalVel, projectileDiameter);
+       double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
 
-      // acceleration split between x and y
-      ddx = dragx;
-      ddy = computedGravity + dragy;
+       // drag components
+       double dragx = -1 * cos(totalDrag);
+       double dragy = -1 * sin(totalDrag);
 
-      // x and y components of velocity
-      dx = computeVelocity(dx, ddx, dt);
+       // x and y acceleration components
+       ddx = dragx;
+       ddy = computedGravity + dragy;
+
+       // x and y components of velocity
+       dx = computeVelocity(dx, ddx, dt);
       dy = computeVelocity(dy, ddy, dt);
 
-      // positions
-      x = computeDistance(posProjectile.getMetersX(), dx, ddx, dt);
-      y = computeDistance(posProjectile.getMetersY(), dy, ddy, dt);
-      // Update position
-      posProjectile.setMetersX(x);
-      posProjectile.setMetersY(y);
-      totalTime += dt;
+       // positions
+       x = computeDistance(posProjectile.getMetersX(), dx, ddx, dt);
+       y = computeDistance(posProjectile.getMetersY(), dy, ddy, dt);
+
+       // Update position
+       posProjectile.setMetersX(x);
+       posProjectile.setMetersY(y);
+       totalTime += dt;
    }
    cout << "Distance: " << posProjectile.getMetersX() << "m  Altitude: " << posProjectile.getMetersY() << "m Hang Time: " << totalTime << "s" << endl;
 
