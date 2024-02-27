@@ -15,69 +15,11 @@
 #include <cassert>      // for ASSERT
 #include <cmath>       // for math functions
 #include "position.h"   // for POSITION
-#include <map>
+
 using namespace std;
 
 #define PI atan(1) * 4  // PI
 
-/*****************************************************************************
- * RADIANS_FROM_DEGREES
- * Convert from degrees to radians
- * INPUT:
- *   deg - Angle in degrees
- *****************************************************************************/
-double radiansFromDegrees(const double & deg)
-{
-   return (deg / 180.0) * PI;
-}
-
-/*****************************************************************************
- * GET_HORIZONTAL_SPEED
- * Compute horizontal component of speed from the angle in radians and the
- * overall speed.
- * INPUT:
- *   speed - Overall speed
- *   rad - Angle in radians
- *****************************************************************************/
-double getHorizontalSpeed(const double & speed, const double & rad)
-{
-   return speed * sin(rad);
-}
-
-/*****************************************************************************
- * GET_VERTICAL_SPEED
- * INPUT:
- *   speed - Overall speed
- *   rad - Angle in radians
- *****************************************************************************/
-double getVerticalSpeed(const double & speed, const double & rad)
-{
-   return speed * cos(rad);
-}
-
-/*****************************************************************************
- * GET_TOTAL_SPEED
- * INPUT:
- *   dx - Horizontal speed
- *   dy - Vertical speed
- *****************************************************************************/
-double getTotalSpeed(const double & dx, const double & dy)
-{
-   return sqrt(dx * dx + dy * dy);
-}
-
-/*****************************************************************************
- * COMPUTE_VELOCITY
- * Gets the new velocity from old velocity, acceleration, and time
- * INPUT:
- *   vel - Old velocity
- *   accel - Acceleration
- *   time - Time
- *****************************************************************************/
-double computeVelocity(double vel, double accel, double time)
-{
-   return vel + (accel * time);
-}
 
 /*****************************************************************************
  * COMPUTE_DISTANCE
@@ -91,55 +33,6 @@ double computeVelocity(double vel, double accel, double time)
 double computeDistance(double s1, double vel, double accel, double time)
 {
    return s1 + (vel * time) + (0.5 * (accel * (time * time)));
-}
-
-/*****************************************************************************
- * LINEAR INTERPOLATION
- * curve fits between two points
- * INPUT:
- *   x0 - x value before the point interested
- *   y0 - y value before the point interested
- *   x1 - x value after the point interested
- *   y1 - y value after the point interrested
- *   x - current x value
- *****************************************************************************/
-double linearInterpolation(double x0, double y0, double x1, double y1, double x)
-{
-    double y = y0 + ((x - x0) * ((y1 - y0) / (x1 - x0)));
-    
-    return y;
-}
-
-/*****************************************************************************
- * COMPUTE GRAVITY
- * finds gravity force
- * INPUT:
- *   gravity_map - A mapped key, value pairs of altitude and gravity forces
- *   altittude -  the current altitude
- *****************************************************************************/
-double computeGravity(map<int, double> gravity_map, double altitude)
-{
-    for (int i = 0; i <= 9000; i += 1000)
-    {
-        if (altitude >= i) 
-        {
-            if (altitude < i + 1000)
-            {
-                return linearInterpolation(i, gravity_map.find(i)->second, i + 1000, gravity_map.find(i + 1000)->second, altitude);
-            }
-        }
-    }
-    for (int i = 10000; i < 25000; i += 5000)
-    {
-        if (altitude > i)
-        {
-            if (altitude <= i + 5000)
-            {
-                return linearInterpolation(i, gravity_map.find(i)->second, i + 5000, gravity_map.find(i + 5000)->second, altitude);
-            }
-        }
-    }
-    return -9.804;
 }
 
 

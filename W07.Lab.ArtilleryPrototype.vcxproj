@@ -127,12 +127,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="acceleration.cpp" />
+    <ClCompile Include="angle.cpp" />
+    <ClCompile Include="drag.cpp" />
+    <ClCompile Include="gravity.cpp" />
     <ClCompile Include="Lab07.cpp" />
     <ClCompile Include="position.cpp" />
+    <ClCompile Include="projectile.cpp" />
+    <ClCompile Include="speed.cpp" />
+    <ClCompile Include="velocity.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="acceleration.h" />
+    <ClInclude Include="angle.h" />
+    <ClInclude Include="drag.h" />
+    <ClInclude Include="gravity.h" />
     <ClInclude Include="position.h" />
+    <ClInclude Include="projectile.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="testPosition.h" />
+    <ClInclude Include="velocity.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="W07.Lab.ArtilleryPrototype.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
