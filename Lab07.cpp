@@ -188,10 +188,33 @@ double computeGravity(map<int, double> gravityMap, double altitude)
    return gravityMap.begin()->second;  // Lower bound
 }
 
+double computeAirDensity(map<int, double> airDensityMap, double altitude)
+{
+   double key0;
+   double value0;
+   double key1;
+   double value1;
+   for (auto it = airDensityMap.begin(); it != airDensityMap.end(); it)
+   {
+      key0 = it->first;
+      value0 = it->second;
 
-double computeDrag(double velocity, double diameter) {
+      if (++it == airDensityMap.end())
+         return it->second;  // Upper bound
+
+      key1 = it->first;
+      value1 = it->second;
+
+      if (altitude >= key0 && altitude < key1)
+         return linearInterpolation(key0, value0, key1, value1, altitude);
+   }
+
+   return airDensityMap.begin()->second;  // Lower bound
+}
+
+
+double computeDrag(double velocity, const double& density, double diameter) {
     const double dragCoefficient = 0.3;
-    const double density = 0.6;
     //diameter in meters
 
     const double radius = diameter / 2;
@@ -244,6 +267,29 @@ int main()
        {25000, -9.730}
    };
 
+   std::map<int, double> airDensities = {
+    {0, 1.2250000},
+    {1000, 1.1120000},
+    {2000, 1.0070000},
+    {3000, 0.9093000},
+    {4000, 0.8194000},
+    {5000, 0.7364000},
+    {6000, 0.6601000},
+    {7000, 0.5900000},
+    {8000, 0.5258000},
+    {9000, 0.4671000},
+    {10000, 0.4135000},
+    {15000, 0.1948000},
+    {20000, 0.0889100},
+    {25000, 0.0400800},
+    {30000, 0.0184100},
+    {40000, 0.0039960},
+    {50000, 0.0010270},
+    {60000, 0.0003097},
+    {70000, 0.0000828},
+    {80000, 0.0000185}
+   };
+
    // Break down muzzle velocity into horizontal and vertical, applying angle
    double dx = getHorizontalComponent(muzzleVel, angleRad);
    double dy = getVerticalComponent(muzzleVel, angleRad);
@@ -261,7 +307,7 @@ int main()
    {
        // totals
        double totalVel = getTotalComponent(dx, dy);
-       double dragForce = computeDrag(totalVel, projectileDiameter);
+       double dragForce = computeDrag(totalVel, computeAirDensity(airDensities, posProjectile.getMetersY()), projectileDiameter);
        double acc = computeAcceleration(dragForce, projectileWeight);
        double computedGravity = computeGravity(gravities, posProjectile.getMetersY());
 
