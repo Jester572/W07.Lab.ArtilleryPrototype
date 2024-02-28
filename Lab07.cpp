@@ -31,39 +31,61 @@ double radiansFromDegrees(const double & deg)
    return (deg / 180.0) * PI;
 }
 
-/*****************************************************************************
- * GET_HORIZONTAL_SPEED
- * Compute horizontal component of speed from the angle in radians and the
- * overall speed.
- * INPUT:
- *   speed - Overall speed
- *   rad - Angle in radians
- *****************************************************************************/
-double getHorizontalSpeed(const double & speed, const double & rad)
+/******************************************
+ * NORMALIZE
+ *    returns the "unwrapped" value of rad
+ *****************************************/
+double normalize(double rad)
 {
-   return speed * sin(rad);
+   double norm_rad = rad;
+
+   if (norm_rad > 0)
+   {
+      while (norm_rad > PI * 2.0)
+         norm_rad -= PI * 2;
+   }
+   else
+   {
+      while (norm_rad < 0)
+         norm_rad += PI * 2;
+   }
+
+   return norm_rad;
 }
 
 /*****************************************************************************
- * GET_VERTICAL_SPEED
+ * GET_HORIZONTAL_COMPONENT
+ * Compute horizontal component of total from the angle in radians and the
+ * overall total.
  * INPUT:
- *   speed - Overall speed
+ *   total - Overall total
  *   rad - Angle in radians
  *****************************************************************************/
-double getVerticalSpeed(const double & speed, const double & rad)
+double getHorizontalComponent(const double & total, const double & rad)
 {
-   return speed * cos(rad);
+   return total * sin(rad);
 }
 
 /*****************************************************************************
- * GET_TOTAL_SPEED
+ * GET_VERTICAL_COMPONENT
  * INPUT:
- *   dx - Horizontal speed
- *   dy - Vertical speed
+ *   total - Overall total
+ *   rad - Angle in radians
  *****************************************************************************/
-double getTotalSpeed(const double & dx, const double & dy)
+double getVerticalComponent(const double & total, const double & rad)
 {
-   return sqrt(dx * dx + dy * dy);
+   return total * cos(rad);
+}
+
+/*****************************************************************************
+ * GET_TOTAL_COMPONENT
+ * INPUT:
+ *   x - Horizontal total
+ *   y - Vertical total
+ *****************************************************************************/
+double getTotalComponent(const double & x, const double & y)
+{
+   return sqrt(x * x + y * y);
 }
 
 /*****************************************************************************
@@ -158,6 +180,12 @@ double computeDrag(double velocity, double diameter) {
     return drag;
 }
 
+
+double computeAcceleration(const double& force, const double& mass)
+{
+   return force / mass;
+}
+
 /*****************************************************************************
  * MAIN
  *****************************************************************************/
@@ -193,46 +221,31 @@ int main()
    };
 
    // Break down muzzle velocity into horizontal and vertical, applying angle
-   double dx = getHorizontalSpeed(muzzleVel, angleRad);
-   double dy = getVerticalSpeed(muzzleVel, angleRad);
+   double dx = getHorizontalComponent(muzzleVel, angleRad);
+   double dy = getVerticalComponent(muzzleVel, angleRad);
 
    double dt = 0.01;
    double x;
    double y;
 
    // Total initial velocity
-   double initialVelocity = getTotalSpeed(dx, dy);
+   double initialVelocity = getTotalComponent(dx, dy);
 
 
-
-   ///* 1. Inertia: No drag, no accel, no gravity; so, dx and dy won't change */
-   //for (int t = 0; t < 20; t++)
-   //{
-   //   // Update position based on constant speed
-   //   posProjectile.addMetersX(dx);
-   //   posProjectile.addMetersY(dy);
-   //}
-   //cout << "Distance: " << posProjectile.getMetersX() << "m  Altitude: " << posProjectile.getMetersY() << "m\n";
-
-
-
-   /* 2. Acceleration: introduce constant gravity */
    double totalTime = 0;
    while(posProjectile.getMetersY() >= 0)
    {
        // totals
-       double totalVel = getTotalSpeed(dx, dy);
-       double totalDrag = -1 * computeDrag(totalVel, projectileDiameter);
+       double totalVel = getTotalComponent(dx, dy);
+       double dragForce = computeDrag(totalVel, projectileDiameter);
+       double acc = computeAcceleration(dragForce, projectileWeight);
        double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
 
-       // drag components
-       double theta = atan2(dx, dy);
-       double dragx = totalDrag * sin(theta);
-       double dragy = totalDrag * cos(theta);
-
-       // x and y acceleration components
-       ddx = dragx;
-       ddy = computedGravity + dragy;
+       // drag (acceleration) components
+       double theta = normalize(atan2(dx, dy) + PI);  // adding PI radians gets the opposite of the computed angle
+       ddx = getHorizontalComponent(acc, theta);
+       double ddyDrag = getVerticalComponent(acc, theta);
+       ddy = computedGravity + ddyDrag;
 
        // x and y components of velocity
        dx = computeVelocity(dx, ddx, dt);
