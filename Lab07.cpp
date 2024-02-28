@@ -134,36 +134,11 @@ double linearInterpolation(double x0, double y0, double x1, double y1, double x)
 
 /*****************************************************************************
  * COMPUTE GRAVITY
- * finds gravities force
+ * finds acceleration due to gravity at specified altitude
  * INPUT:
- *   gravity_map - A mapped key, value pairs of altitude and gravities forces
- *   altittude -  the current altitude
+ *   gravity_map - A mapped key, value pairs of altitude and gravity
+ *   altittude - the altitude to get gravity for
  *****************************************************************************/
-//double computeGravity(map<int, double> gravity_map, double altitude)
-//{
-//    for (int i = 0; i <= 9000; i += 1000)
-//    {
-//        if (altitude >= i) 
-//        {
-//            if (altitude < i + 1000)
-//            {
-//                return linearInterpolation(i, gravity_map.find(i)->second, i + 1000, gravity_map.find(i + 1000)->second, altitude);
-//            }
-//        }
-//    }
-//    for (int i = 10000; i < 25000; i += 5000)
-//    {
-//        if (altitude > i)
-//        {
-//            if (altitude <= i + 5000)
-//            {
-//                return linearInterpolation(i, gravity_map.find(i)->second, i + 5000, gravity_map.find(i + 5000)->second, altitude);
-//            }
-//        }
-//    }
-//    return -9.804;
-//}
-
 double computeGravity(map<int, double> gravityMap, double altitude)
 {
    double key0;
