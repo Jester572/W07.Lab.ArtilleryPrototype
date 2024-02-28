@@ -170,23 +170,22 @@ double computeGravity(map<int, double> gravityMap, double altitude)
    double value0;
    double key1;
    double value1;
-   map<int, double>::iterator nextIt;
    for (auto it = gravityMap.begin(); it != gravityMap.end(); it)
    {
       key0 = it->first;
       value0 = it->second;
 
       if (++it == gravityMap.end())
-         break;
+         return -9.730;  // Upper bound
 
       key1 = it->first;
       value1 = it->second;
 
-      if (altitude > key0 && altitude < key1)
+      if (altitude >= key0 && altitude < key1)
          return linearInterpolation(key0, value0, key1, value1, altitude);
    }
 
-   return -9.804;
+   return -9.804;  // Lower bound
 }
 
 
