@@ -133,63 +133,39 @@ double linearInterpolation(double x0, double y0, double x1, double y1, double x)
 }
 
 /*****************************************************************************
- * COMPUTE GRAVITY
- * finds acceleration due to gravity at specified altitude
+ * INTERPOLATE_VALUE_FROM_MAP
+ * Finds in the inputs (keys) of the map where inputValue would be and uses the
+ * two closest points (key, value) to interpolate its outputValue.
  * INPUT:
- *   gravity_map - A mapped key, value pairs of altitude and gravity
- *   altittude - the altitude to get gravity for
+ *   tableMap - A mapped key, value pairs
+ *   inputValue - the input for the map
  *****************************************************************************/
-double computeGravity(map<int, double> gravityMap, double altitude)
+double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
 {
    double key0;
    double value0;
    double key1;
    double value1;
-   for (auto it = gravityMap.begin(); it != gravityMap.end(); it)
+   for (auto it = tableMap.begin(); it != tableMap.end(); it)
    {
       key0 = it->first;
       value0 = it->second;
 
-      if (++it == gravityMap.end())
+      if (++it == tableMap.end())
          return it->second;  // Upper bound
 
       key1 = it->first;
       value1 = it->second;
 
-      if (altitude >= key0 && altitude < key1)
-         return linearInterpolation(key0, value0, key1, value1, altitude);
+      if (inputValue >= key0 && inputValue < key1)
+         return linearInterpolation(key0, value0, key1, value1, inputValue);
    }
 
-   return gravityMap.begin()->second;  // Lower bound
+   return tableMap.begin()->second;  // Lower bound
 }
 
-double computeAirDensity(map<int, double> airDensityMap, double altitude)
-{
-   double key0;
-   double value0;
-   double key1;
-   double value1;
-   for (auto it = airDensityMap.begin(); it != airDensityMap.end(); it)
-   {
-      key0 = it->first;
-      value0 = it->second;
-
-      if (++it == airDensityMap.end())
-         return it->second;  // Upper bound
-
-      key1 = it->first;
-      value1 = it->second;
-
-      if (altitude >= key0 && altitude < key1)
-         return linearInterpolation(key0, value0, key1, value1, altitude);
-   }
-
-   return airDensityMap.begin()->second;  // Lower bound
-}
-
-
-double computeDrag(double velocity, const double& density, double diameter) {
-    const double dragCoefficient = 0.3;
+double computeDrag(const double& velocity, const double& dragCoefficient, const double& density, const double& diameter) {
+    //const double dragCoefficient = 0.3;
     //diameter in meters
 
     const double radius = diameter / 2;
@@ -202,7 +178,6 @@ double computeDrag(double velocity, const double& density, double diameter) {
     return drag;
 }
 
-
 double computeAcceleration(const double& force, const double& mass)
 {
    return force / mass;
@@ -213,7 +188,7 @@ double computeAcceleration(const double& force, const double& mass)
  *****************************************************************************/
 int main()
 {
-   Position posProjectile(0.0, 0.0);  // starting distance, altitude (x, y)
+   Position posProjectile(0.0, 0.0);  // starting distance, inputValue (x, y)
 
    double angleDeg = 75.0;  // degrees
    double angleRad = radiansFromDegrees(angleDeg);  // radians
@@ -225,44 +200,87 @@ int main()
    // Acceleration
    double ddx;
    double ddy;
-   std::map<int, double> gravities = {
-       {0, -9.807},
-       {1000, -9.804},
-       {2000, -9.801},
-       {3000, -9.797},
-       {4000, -9.794},
-       {5000, -9.791},
-       {6000, -9.788},
-       {7000, -9.785},
-       {8000, -9.782},
-       {9000, -9.779},
-       {10000, -9.776},
-       {15000, -9.761},
-       {20000, -9.745},
-       {25000, -9.730}
+
+   // Altitude to gravity (m/s^2)
+   std::map<double, double> gravityMap = {
+       {0.0, -9.807},
+       {1000.0, -9.804},
+       {2000.0, -9.801},
+       {3000.0, -9.797},
+       {4000.0, -9.794},
+       {5000.0, -9.791},
+       {6000.0, -9.788},
+       {7000.0, -9.785},
+       {8000.0, -9.782},
+       {9000.0, -9.779},
+       {10000.0, -9.776},
+       {15000.0, -9.761},
+       {20000.0, -9.745},
+       {25000.0, -9.730}
    };
 
-   std::map<int, double> airDensities = {
-      {0, 1.2250000},
-      {1000, 1.1120000},
-      {2000, 1.0070000},
-      {3000, 0.9093000},
-      {4000, 0.8194000},
-      {5000, 0.7364000},
-      {6000, 0.6601000},
-      {7000, 0.5900000},
-      {8000, 0.5258000},
-      {9000, 0.4671000},
-      {10000, 0.4135000},
-      {15000, 0.1948000},
-      {20000, 0.0889100},
-      {25000, 0.0400800},
-      {30000, 0.0184100},
-      {40000, 0.0039960},
-      {50000, 0.0010270},
-      {60000, 0.0003097},
-      {70000, 0.0000828},
-      {80000, 0.0000185}
+   // Altitude to air density (kg/m^2)
+   map<double, double> airDensityMap = {
+      {0.0, 1.2250000},
+      {1000.0, 1.1120000},
+      {2000.0, 1.0070000},
+      {3000.0, 0.9093000},
+      {4000.0, 0.8194000},
+      {5000.0, 0.7364000},
+      {6000.0, 0.6601000},
+      {7000.0, 0.5900000},
+      {8000.0, 0.5258000},
+      {9000.0, 0.4671000},
+      {10000.0, 0.4135000},
+      {15000.0, 0.1948000},
+      {20000.0, 0.0889100},
+      {25000.0, 0.0400800},
+      {30000.0, 0.0184100},
+      {40000.0, 0.0039960},
+      {50000.0, 0.0010270},
+      {60000.0, 0.0003097},
+      {70000.0, 0.0000828},
+      {80000.0, 0.0000185}
+   };
+
+   // Altitude to speed of sound (mach) (m/s)
+   map<double, double> machMap = {
+      {0.0, 340.0},
+      {1000.0, 336.0},
+      {2000.0, 332.0},
+      {3000.0, 328.0},
+      {4000.0, 324.0},
+      {5000.0, 320.0},
+      {6000.0, 316.0},
+      {7000.0, 312.0},
+      {8000.0, 308.0},
+      {9000.0, 303.0},
+      {10000.0, 299.0},
+      {15000.0, 295.0},
+      {20000.0, 295.0},
+      {25000.0, 295.0},
+      {30000.0, 305.0},
+      {40000.0, 324.0}
+   };
+
+   // Mach to drag coefficient (force component)
+   map<double, double> dragCoefficientMap = {
+      {0.300, 0.1629},
+      {0.500, 0.1659},
+      {0.700, 0.2031},
+      {0.890, 0.2597},
+      {0.920, 0.3010},
+      {0.960, 0.3287},
+      {0.980, 0.4002},
+      {1.000, 0.4258},
+      {1.020, 0.4335},
+      {1.060, 0.4483},
+      {1.240, 0.4064},
+      {1.530, 0.3663},
+      {1.990, 0.2897},
+      {2.870, 0.2297},
+      {2.890, 0.2306},
+      {5.000, 0.2656}
    };
 
    // Break down muzzle velocity into horizontal and vertical, applying angle
@@ -276,20 +294,37 @@ int main()
    // Total initial velocity
    double initialVelocity = getTotalComponent(dx, dy);
 
+   double totalVel;
+   double mach;
+   double mVel;
+
+   double airDensity;
+   double dragCoefficient;
+   double dragForce;
+   double acc;
+   double computedGravity;
+
+   double theta;
+   double ddyDrag;
 
    double totalTime = 0;
    while(posProjectile.getMetersY() >= 0)
    {
        // totals
-       double totalVel = getTotalComponent(dx, dy);
-       double dragForce = computeDrag(totalVel, computeAirDensity(airDensities, posProjectile.getMetersY()), projectileDiameter);
-       double acc = computeAcceleration(dragForce, projectileWeight);
-       double computedGravity = computeGravity(gravities, posProjectile.getMetersY());
+       totalVel = getTotalComponent(dx, dy);
+       mach = interpolateValueFromMap(machMap, posProjectile.getMetersY());  // Speed of sound at current altitude
+       mVel = totalVel / mach;  // Speed of projectile in relation to speed of sound
+
+       airDensity = interpolateValueFromMap(airDensityMap, posProjectile.getMetersY());
+       dragCoefficient = interpolateValueFromMap(dragCoefficientMap, mVel);
+       dragForce = computeDrag(totalVel, dragCoefficient, airDensity, projectileDiameter);
+       acc = computeAcceleration(dragForce, projectileWeight);
+       computedGravity = interpolateValueFromMap(gravityMap, posProjectile.getMetersY());
 
        // drag (acceleration) components
-       double theta = normalize(atan2(dx, dy) + PI);  // adding PI radians gets the opposite of the computed angle
+       theta = normalize(atan2(dx, dy) + PI);  // adding PI radians gets the opposite of the computed angle
        ddx = getHorizontalComponent(acc, theta);
-       double ddyDrag = getVerticalComponent(acc, theta);
+       ddyDrag = getVerticalComponent(acc, theta);
        ddy = computedGravity + ddyDrag;
 
        // x and y components of velocity
