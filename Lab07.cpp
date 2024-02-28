@@ -141,6 +141,12 @@ double linearInterpolation(const double& x0, const double& y0, const double& x1,
  *****************************************************************************/
 double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
 {
+   if (inputValue <= tableMap.begin()->first)
+      return tableMap.begin()->second;  // Lower bound
+
+   if (inputValue >= (--tableMap.end())->first)
+      return (--tableMap.end())->second;  // Upper bound
+
    double key0;
    double value0;
    double key1;
@@ -151,7 +157,7 @@ double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
       value0 = it->second;
 
       if (++it == tableMap.end())
-         return (--it)->second;  // Upper bound
+         break;
 
       key1 = it->first;
       value1 = it->second;
@@ -160,7 +166,7 @@ double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
          return linearInterpolation(key0, value0, key1, value1, inputValue);
    }
 
-   return tableMap.begin()->second;  // Lower bound
+   assert(false, "In interpolation from map: assert should be unreachable. No value returned.");
 }
 
 double computeDrag(const double& velocity, const double& dragCoefficient, const double& density, const double& diameter) {
