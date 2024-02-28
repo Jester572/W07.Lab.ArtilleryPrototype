@@ -117,19 +117,17 @@ double computeDistance(double s1, double vel, double accel, double time)
 
 /*****************************************************************************
  * LINEAR INTERPOLATION
- * curve fits between two points
+ * Get y value from x value between two (x, y) points
  * INPUT:
- *   key0 - x value before the point interested
- *   value0 - y value before the point interested
- *   key1 - x value after the point interested
- *   value1 - y value after the point interrested
- *   x - current x value
+ *   x0 - x value before the point of interest
+ *   y0 - y value before the point of interest
+ *   x1 - x value after the point of interest
+ *   y1 - y value after the point of interest
+ *   x - x value of point of interest
  *****************************************************************************/
-double linearInterpolation(double x0, double y0, double x1, double y1, double x)
+double linearInterpolation(const double& x0, const double& y0, const double& x1, const double& y1, const double& x)
 {
-    double y = y0 + ((x - x0) * ((y1 - y0) / (x1 - x0)));
-    
-    return y;
+    return y0 + ((x - x0) * ((y1 - y0) / (x1 - x0)));
 }
 
 /*****************************************************************************
@@ -186,7 +184,7 @@ double computeAcceleration(const double& force, const double& mass)
  *****************************************************************************/
 int main()
 {
-   Position posProjectile(0.0, 0.0);  // starting distance, inputValue (x, y)
+   Position posProjectile(0.0, 0.0);  // starting distance, altitude (x, y)
 
    double angleDeg = 75.0;  // degrees
    double angleRad = radiansFromDegrees(angleDeg);  // radians
@@ -305,7 +303,9 @@ int main()
    double theta;
    double ddyDrag;
 
-   double totalTime = 0;
+   Position penultimatePos;
+   double penultimateTime = 0.0;
+   double totalTime = 0.0;
    while(posProjectile.getMetersY() >= 0)
    {
        // totals
@@ -319,26 +319,42 @@ int main()
        acc = computeAcceleration(dragForce, projectileWeight);
        computedGravity = interpolateValueFromMap(gravityMap, posProjectile.getMetersY());
 
-       // drag (acceleration) components
+       // New drag (acceleration) components
        theta = normalize(atan2(dx, dy) + PI);  // adding PI radians gets the opposite of the computed angle
        ddx = getHorizontalComponent(acc, theta);
        ddyDrag = getVerticalComponent(acc, theta);
        ddy = computedGravity + ddyDrag;
 
-       // x and y components of velocity
+       // New x and y components of velocity
        dx = computeVelocity(dx, ddx, dt);
        dy = computeVelocity(dy, ddy, dt);
 
-       // positions
+       // New positions
        x = computeDistance(posProjectile.getMetersX(), dx, ddx, dt);
        y = computeDistance(posProjectile.getMetersY(), dy, ddy, dt);
 
-       // Update position
+       // Store position and time before updating for linear interpolation at altitude 0
+       penultimatePos.setMetersX(posProjectile.getMetersX());
+       penultimatePos.setMetersY(posProjectile.getMetersY());
+       penultimateTime = totalTime;
+
+       // Update position and time
        posProjectile.setMetersX(x);
        posProjectile.setMetersY(y);
        totalTime += dt;
    }
-   cout << "Distance: " << posProjectile.getMetersX() << "m  Altitude: " << posProjectile.getMetersY() << "m Hang Time: " << totalTime << "s" << endl;
+
+   double timeAtGround = linearInterpolation(penultimatePos.getMetersY(), penultimateTime,  // alt, time
+                                             posProjectile.getMetersY(), totalTime,  // alt, time
+                                             0.0);  // alt, return time
+   
+   double distanceAtGround = linearInterpolation(penultimatePos.getMetersY(), penultimatePos.getMetersX(),  // alt, dist
+                                                 posProjectile.getMetersY(), posProjectile.getMetersX(),  // alt, dist
+                                                 0.0);  // alt, return dist
+
+   cout.precision(1);
+   cout.setf(ios::fixed | ios::showpoint);
+   cout << "Distance: " << distanceAtGround << "m\tHang Time : " << timeAtGround << "s" << endl;
 
    return EXIT_SUCCESS;
 }
