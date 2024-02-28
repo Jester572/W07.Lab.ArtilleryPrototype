@@ -134,9 +134,9 @@ double linearInterpolation(double x0, double y0, double x1, double y1, double x)
 
 /*****************************************************************************
  * COMPUTE GRAVITY
- * finds gravity force
+ * finds gravities force
  * INPUT:
- *   gravity_map - A mapped key, value pairs of altitude and gravity forces
+ *   gravity_map - A mapped key, value pairs of altitude and gravities forces
  *   altittude -  the current altitude
  *****************************************************************************/
 //double computeGravity(map<int, double> gravity_map, double altitude)
@@ -176,7 +176,7 @@ double computeGravity(map<int, double> gravityMap, double altitude)
       value0 = it->second;
 
       if (++it == gravityMap.end())
-         return -9.730;  // Upper bound
+         return it->second;  // Upper bound
 
       key1 = it->first;
       value1 = it->second;
@@ -185,7 +185,7 @@ double computeGravity(map<int, double> gravityMap, double altitude)
          return linearInterpolation(key0, value0, key1, value1, altitude);
    }
 
-   return -9.804;  // Lower bound
+   return gravityMap.begin()->second;  // Lower bound
 }
 
 
@@ -227,7 +227,7 @@ int main()
    // Acceleration
    double ddx;
    double ddy;
-   std::map<int, double> gravity = {
+   std::map<int, double> gravities = {
        {0, -9.807},
        {1000, -9.804},
        {2000, -9.801},
@@ -263,7 +263,7 @@ int main()
        double totalVel = getTotalComponent(dx, dy);
        double dragForce = computeDrag(totalVel, projectileDiameter);
        double acc = computeAcceleration(dragForce, projectileWeight);
-       double computedGravity = computeGravity(gravity, posProjectile.getMetersY());
+       double computedGravity = computeGravity(gravities, posProjectile.getMetersY());
 
        // drag (acceleration) components
        double theta = normalize(atan2(dx, dy) + PI);  // adding PI radians gets the opposite of the computed angle
