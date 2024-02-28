@@ -165,9 +165,7 @@ double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
 }
 
 double computeDrag(const double& velocity, const double& dragCoefficient, const double& density, const double& diameter) {
-    //const double dragCoefficient = 0.3;
     //diameter in meters
-
     const double radius = diameter / 2;
 
     double area = PI * pow(radius, 2);
