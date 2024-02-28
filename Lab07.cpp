@@ -119,10 +119,10 @@ double computeDistance(double s1, double vel, double accel, double time)
  * LINEAR INTERPOLATION
  * curve fits between two points
  * INPUT:
- *   x0 - x value before the point interested
- *   y0 - y value before the point interested
- *   x1 - x value after the point interested
- *   y1 - y value after the point interrested
+ *   key0 - x value before the point interested
+ *   value0 - y value before the point interested
+ *   key1 - x value after the point interested
+ *   value1 - y value after the point interrested
  *   x - current x value
  *****************************************************************************/
 double linearInterpolation(double x0, double y0, double x1, double y1, double x)
@@ -139,29 +139,54 @@ double linearInterpolation(double x0, double y0, double x1, double y1, double x)
  *   gravity_map - A mapped key, value pairs of altitude and gravity forces
  *   altittude -  the current altitude
  *****************************************************************************/
-double computeGravity(map<int, double> gravity_map, double altitude)
+//double computeGravity(map<int, double> gravity_map, double altitude)
+//{
+//    for (int i = 0; i <= 9000; i += 1000)
+//    {
+//        if (altitude >= i) 
+//        {
+//            if (altitude < i + 1000)
+//            {
+//                return linearInterpolation(i, gravity_map.find(i)->second, i + 1000, gravity_map.find(i + 1000)->second, altitude);
+//            }
+//        }
+//    }
+//    for (int i = 10000; i < 25000; i += 5000)
+//    {
+//        if (altitude > i)
+//        {
+//            if (altitude <= i + 5000)
+//            {
+//                return linearInterpolation(i, gravity_map.find(i)->second, i + 5000, gravity_map.find(i + 5000)->second, altitude);
+//            }
+//        }
+//    }
+//    return -9.804;
+//}
+
+double computeGravity(map<int, double> gravityMap, double altitude)
 {
-    for (int i = 0; i <= 9000; i += 1000)
-    {
-        if (altitude >= i) 
-        {
-            if (altitude < i + 1000)
-            {
-                return linearInterpolation(i, gravity_map.find(i)->second, i + 1000, gravity_map.find(i + 1000)->second, altitude);
-            }
-        }
-    }
-    for (int i = 10000; i < 25000; i += 5000)
-    {
-        if (altitude > i)
-        {
-            if (altitude <= i + 5000)
-            {
-                return linearInterpolation(i, gravity_map.find(i)->second, i + 5000, gravity_map.find(i + 5000)->second, altitude);
-            }
-        }
-    }
-    return -9.804;
+   double key0;
+   double value0;
+   double key1;
+   double value1;
+   map<int, double>::iterator nextIt;
+   for (auto it = gravityMap.begin(); it != gravityMap.end(); it)
+   {
+      key0 = it->first;
+      value0 = it->second;
+
+      if (++it == gravityMap.end())
+         break;
+
+      key1 = it->first;
+      value1 = it->second;
+
+      if (altitude > key0 && altitude < key1)
+         return linearInterpolation(key0, value0, key1, value1, altitude);
+   }
+
+   return -9.804;
 }
 
 
