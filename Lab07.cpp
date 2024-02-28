@@ -162,11 +162,13 @@ double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
       key1 = it->first;
       value1 = it->second;
 
+      assert(key1 > key0);  // Map keys must be increasing.
+
       if (inputValue >= key0 && inputValue < key1)
          return linearInterpolation(key0, value0, key1, value1, inputValue);
    }
 
-   assert(false, "In interpolation from map: assert should be unreachable. No value returned.");
+   assert(false);  // Assert should be unreachable. See above assert.
 }
 
 double computeDrag(const double& velocity, const double& dragCoefficient, const double& density, const double& diameter) {
