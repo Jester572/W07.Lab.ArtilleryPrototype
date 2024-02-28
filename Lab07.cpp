@@ -7,9 +7,10 @@
  *      Compute the distance and hang time of an M795 posProjectile
  *      when fired from the M777 howitzer.
  * 4. What was the hardest part? Be as specific as possible.
- *      ??
+ *      Calculating the drag force, getting the acceleration, and
+ *      applying that in the opposite angle of velocity.
  * 5. How long did it take for you to complete the assignment?
- *      1.5h + ?? + ??
+ *      OVER 12 HOURS!! D: D:
  *****************************************************************/
 
 #include <cassert>      // for ASSERT
@@ -150,7 +151,7 @@ double interpolateValueFromMap(map<double, double> tableMap, double inputValue)
       value0 = it->second;
 
       if (++it == tableMap.end())
-         return it->second;  // Upper bound
+         return (--it)->second;  // Upper bound
 
       key1 = it->first;
       value1 = it->second;
@@ -186,7 +187,9 @@ int main()
 {
    Position posProjectile(0.0, 0.0);  // starting distance, altitude (x, y)
 
-   double angleDeg = 75.0;  // degrees
+   double angleDeg;  // degrees
+   cout << "What angle will you shoot the howitzer?: ";
+   cin >> angleDeg;
    double angleRad = radiansFromDegrees(angleDeg);  // radians
 
    const double muzzleVel = 827.0;  // m/s
@@ -354,7 +357,7 @@ int main()
 
    cout.precision(1);
    cout.setf(ios::fixed | ios::showpoint);
-   cout << "Distance: " << distanceAtGround << "m\tHang Time : " << timeAtGround << "s" << endl;
+   cout << "Distance: " << distanceAtGround << "m\tHang Time : " << timeAtGround << "s\n\n";
 
    return EXIT_SUCCESS;
 }
